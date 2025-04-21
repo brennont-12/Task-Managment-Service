@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Task Management Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background: #f4f6f9;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 36px;
+            color: #2c3e50;
+        }
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+        .card {
+            background: white;
+            width: 320px;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        .card h2 {
+            margin-top: 0;
+            font-size: 22px;
+            color: #34495e;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .stat {
+            flex: 1 1 30%;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2980b9;
+        }
+        .links {
+            text-align: center;
+            margin-top: 40px;
+        }
+        .links a {
+            text-decoration: none;
+            margin: 0 15px;
+            color: #3498db;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        .links a:hover {
+            color: #1abc9c;
+        }
+    </style>
+</head>
+<body>
+    <h1>Task Management Dashboard</h1>
+    
+    <div class="dashboard">
+        <div class="card">
+            <h2>Task Overview</h2>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value">{{ stats.total_tasks }}</div>
+                    <div>Total Tasks</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">{{ stats.status_counts.pending }}</div>
+                    <div>Pending</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">{{ stats.status_counts.in_progress }}</div>
+                    <div>In Progress</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">{{ stats.status_counts.completed }}</div>
+                    <div>Completed</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Priority Distribution</h2>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value">{{ stats.priority_counts.high }}</div>
+                    <div>High</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">{{ stats.priority_counts.medium }}</div>
+                    <div>Medium</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">{{ stats.priority_counts.low }}</div>
+                    <div>Low</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>System Activity</h2>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value">{{ activity.new_tasks }}</div>
+                    <div>New Tasks</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">{{ activity.updates }}</div>
+                    <div>Updated Tasks</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="links">
+        <a href="/task-create/">➕ Create New Task</a>
+        <a href="/query/">📋 View All Tasks</a>
+    </div>
+</body>
+</html>

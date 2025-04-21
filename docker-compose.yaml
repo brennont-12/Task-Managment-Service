@@ -1,0 +1,64 @@
+version: '3'
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - task-creation
+      - task-query
+      - task-update
+      - dashboard
+    networks:
+      - task-network
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - task-network
+
+  task-creation:
+    build: ./task-creation
+    volumes:
+      - ./task-creation:/app
+    depends_on:
+      - redis
+    networks:
+      - task-network
+
+  task-query:
+    build: ./task-query
+    volumes:
+      - ./task-query:/app
+    depends_on:
+      - redis
+    networks:
+      - task-network
+
+  task-update:
+    build: ./task-update
+    volumes:
+      - ./task-update:/app
+    depends_on:
+      - redis
+    networks:
+      - task-network
+
+  dashboard:
+    build: ./dashboard
+    volumes:
+      - ./dashboard:/app
+    depends_on:
+      - redis
+      - task-query
+      - task-update
+    networks:
+      - task-network
+
+networks:
+  task-network:
+    driver: bridge

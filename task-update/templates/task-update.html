@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Update Task</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 40px;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+        }
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border 0.3s ease;
+        }
+        input:focus, textarea:focus, select:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .delete-btn {
+            background: #e74c3c;
+        }
+        .delete-btn:hover {
+            background: #c0392b;
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        p {
+            text-align: center;
+            margin-top: 20px;
+        }
+        a {
+            text-decoration: none;
+            color: #3498db;
+            font-weight: 600;
+            margin: 0 10px;
+            transition: color 0.3s ease;
+        }
+        a:hover {
+            color: #1abc9c;
+        }
+    </style>
+</head>
+<body>
+    <h1>Update Task</h1>
+    <form id="taskForm" method="POST" action="/update/save">
+        <input type="hidden" name="task_id" value="{{ task.id }}">
+        
+        <div class="form-group">
+            <label for="title">Title:</label>
+            <input type="text" id="title" name="title" value="{{ task.title }}" required>
+        </div>
+        <div class="form-group">
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" rows="4">{{ task.description }}</textarea>
+        </div>
+        <div class="form-group">
+            <label for="priority">Priority:</label>
+            <select id="priority" name="priority">
+                <option value="low" {% if task.priority == 'low' %}selected{% endif %}>Low</option>
+                <option value="medium" {% if task.priority == 'medium' %}selected{% endif %}>Medium</option>
+                <option value="high" {% if task.priority == 'high' %}selected{% endif %}>High</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="due_date">Due Date (YYYY-MM-DD):</label>
+            <input type="text" id="due_date" name="due_date" value="{{ task.due_date }}">
+        </div>
+        <div class="form-group">
+            <label for="status">Status:</label>
+            <select id="status" name="status">
+                <option value="pending" {% if task.status == 'pending' %}selected{% endif %}>Pending</option>
+                <option value="in_progress" {% if task.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                <option value="completed" {% if task.status == 'completed' %}selected{% endif %}>Completed</option>
+            </select>
+        </div>
+        <div class="button-group">
+            <button type="submit" name="update">Update Task</button>
+            <button type="submit" name="delete" class="delete-btn">Delete Task</button>
+        </div>
+    </form>
+    <p>
+        <a href="/query/">← Back to Task List</a> |
+        <a href="/dashboard/">🏠 Go to Dashboard</a>
+    </p>
+</body>
+</html>

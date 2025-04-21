@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Task List</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 40px;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .filter {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .filter label {
+            font-weight: 600;
+        }
+
+        .filter select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        .filter button {
+            padding: 10px 16px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+
+        .filter button:hover {
+            background: #2980b9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+
+        th, td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            font-size: 15px;
+        }
+
+        tr:hover {
+            background-color: #f9fbfd;
+        }
+
+        .priority-high {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .priority-medium {
+            color: #f39c12;
+            font-weight: bold;
+        }
+
+        .priority-low {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        td a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        td a:hover {
+            color: #1abc9c;
+        }
+
+        .links {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .links a {
+            text-decoration: none;
+            color: #3498db;
+            font-weight: 600;
+            margin: 0 15px;
+            transition: color 0.3s ease;
+        }
+
+        .links a:hover {
+            color: #1abc9c;
+        }
+
+        .delete-button {
+            background: #e74c3c;
+            color: white;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+
+        .delete-button:hover {
+            background: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Task List</h1>
+        
+        <div class="filter">
+            <form method="GET" action="/filter">
+                <label for="status">Status:</label>
+                <select id="status" name="status">
+                    <option value="all">All</option>
+                    <option value="pending">Pending</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                </select>
+
+                <label for="priority">Priority:</label>
+                <select id="priority" name="priority">
+                    <option value="all">All</option>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                </select>
+
+                <button type="submit">Apply Filters</button>
+            </form>
+        </div>
+        
+        <table>
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Due Date</th>
+                <th>Actions</th>
+            </tr>
+            {% for task in tasks %}
+            <tr>
+                <td>{{ task.title }}</td>
+                <td>{{ task.description }}</td>
+                <td class="priority-{{ task.priority }}">{{ task.priority.title() }}</td>
+                <td>{{ task.status.replace('_', ' ').title() }}</td>
+                <td>{{ task.due_date }}</td>
+                <td>
+                    <a href="/update/?task_id={{ task.id }}">Edit</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        
+        <div class="links">
+            <a href="/task-create/create">➕ Create New Task</a>
+            <a href="/dashboard/">🏠 Go to Dashboard</a>
+        </div>
+
+        <form method="POST" action="/query/delete-all" style="text-align: center; margin-top: 20px;">
+            <button type="submit" class="delete-button">Delete All Tasks</button>
+        </form>
+    </div>
+</body>
+</html>
