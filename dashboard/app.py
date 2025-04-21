@@ -6,7 +6,6 @@ import requests
 app = Flask(__name__)
 redis_client = redis.Redis(host='redis', port=6379, db=0)
 
-
 @app.route('/')
 def index():
     # Get task statistics by communicating with the Task Query Service
