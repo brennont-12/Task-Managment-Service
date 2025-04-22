@@ -63,10 +63,22 @@ The system consists of the following services:
     ```
 3. Access the application:
 
-Dashboard: http://<local-ip>/
-Task Creation: http://<local-ip>/task-create/
-Task Query: http://<local-ip>/query/
-Task Update: http://<local-ip>/update/
+Dashboard: 
+```
+http://<local-ip>/
+```
+Task Creation: 
+```
+http://<local-ip>/task-create/
+```
+Task Query: 
+```
+http://<local-ip>/query/
+```
+Task Update:
+```
+http://<local-ip>/update/
+```
 
 ## Usage
 
