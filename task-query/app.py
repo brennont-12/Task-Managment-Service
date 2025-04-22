@@ -1,20 +1,23 @@
 from flask import Flask, request, jsonify, render_template, redirect
 import redis
+from datetime import datetime
 
 app = Flask(__name__)
 redis_client = redis.Redis(host='redis', port=6379, db=0)
 
+def get_today_date_key(metric):
+    # Get a redis key with today's date embedded
+    today = datetime.now().strftime('%Y-%m-%d')
+    return f'{metric}:{today}'
 
 def get_all_tasks():
     tasks = []
     task_ids = redis_client.smembers('tasks')
-    
     for task_id in task_ids:
         task_data = redis_client.hgetall(f'task:{task_id.decode()}')
         if task_data:
             task = {key.decode(): value.decode() for key, value in task_data.items()}
             tasks.append(task)
-    
     return tasks
 
 @app.route('/')
@@ -26,13 +29,11 @@ def index():
 def filter_tasks():
     status = request.args.get('status', 'all')
     priority = request.args.get('priority', 'all')
-    
     tasks = get_all_tasks()
     
     # Apply filters
     if status != 'all':
         tasks = [task for task in tasks if task['status'] == status]
-    
     if priority != 'all':
         tasks = [task for task in tasks if task['priority'] == priority]
     
@@ -42,9 +43,6 @@ def filter_tasks():
 def delete_all_tasks():
     # Get all keys that match task:* pattern
     task_keys = redis_client.keys('task:*')
-
-    # Check what type the 'tasks' key is
-    redis_client.type('tasks').decode() if redis_client.exists('tasks') else 'non-existent'
     
     # Create a pipeline
     pipeline = redis_client.pipeline()
@@ -53,12 +51,18 @@ def delete_all_tasks():
     for task_key in task_keys:
         pipeline.delete(task_key)
     
-    # Delete the 'tasks' key regardless of its type
+    # Delete the 'tasks' key if it exists
     if redis_client.exists('tasks'):
         pipeline.delete('tasks')
-
-    # Reset the new_tasks_count
-    pipeline.set('new_tasks_count', 0)   
+    
+    # Reset today's new_tasks_count and updates_count using date-based keys
+    new_tasks_key = get_today_date_key('new_tasks_count')
+    updates_key = get_today_date_key('updates_count')
+    
+    # Set both counters to 0
+    pipeline.set(new_tasks_key, 0)
+    pipeline.set(updates_key, 0)
+    
     pipeline.execute()
     
     # Return success
@@ -78,13 +82,12 @@ def api_task(task_id):
     task_data = redis_client.hgetall(f'task:{task_id}')
     if not task_data:
         return jsonify({"error": "Task not found"}), 404
-    
     task = {key.decode(): value.decode() for key, value in task_data.items()}
     return jsonify(task)
 
 @app.route('/api/tasks/stats')
 def api_tasks_stats():
-    """API endpoint for the Dashboard service to get task statistics"""
+    # API Endpoint to get task statistics
     tasks = get_all_tasks()
     
     # Count tasks by status

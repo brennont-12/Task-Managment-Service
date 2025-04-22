@@ -6,12 +6,30 @@ import requests
 app = Flask(__name__)
 redis_client = redis.Redis(host='redis', port=6379, db=0)
 
+def get_today_date_key(metric):
+    # Get a redis key with today's date embedded
+    today = dt.now().strftime('%Y-%m-%d')
+    return f'{metric}:{today}'
+
+def get_updates_today():
+    # Get the number of updates for today, using date-based data
+    updates_key = get_today_date_key('updates_count')
+    count = redis_client.get(updates_key)
+    return int(count) if count else 0
+
+def get_new_tasks_today():
+    # Get the number of updates for today, using date-based data
+    new_tasks_key = get_today_date_key('new_tasks_count')
+    count = redis_client.get(new_tasks_key)
+    return int(count) if count else 0
+
 @app.route('/')
 def index():
     task_id = request.args.get('task_id')
     if not task_id:
         return redirect('/query/')
-    # First, check if the task exists by communicating with the Task Query Service
+    
+    # Check if the task exists by communicating with the Task Query Service
     try:
         response = requests.get(f'http://task-query:5000/api/task/{task_id}')
         if response.status_code != 200:
@@ -35,11 +53,13 @@ def save_task():
         redis_client.srem('tasks', task_id)
         # Delete the task hash
         redis_client.delete(f'task:{task_id}')
+        
         try:
             requests.post('http://dashboard:5000/notify_task_delete',
                          data={'task_id': task_id})
         except requests.exceptions.RequestException as e:
             print(f"Error notifying dashboard: {e}")
+        
         return redirect('/delete_success')
     
     # Handle update (default case)
@@ -80,9 +100,18 @@ def delete_success():
 @app.route('/api/task_updates')
 def get_task_updates():
     return {
-        'updates_today': int(redis_client.get('updates_count')) or 0,
-        'new_tasks': int(redis_client.get('new_tasks_count')) or 0
+        'updates_today': get_updates_today(),
+        'new_tasks': get_new_tasks_today()
     }
+
+@app.route('/notify_task_update', methods=['POST'])
+def notify_task_update():
+    # Increment the date-based counter
+    updates_key = get_today_date_key('updates_count')
+    redis_client.incr(updates_key)
+    # Set expiry for 48 hours (to ensure it's available for the full day)
+    redis_client.expire(updates_key, 60*60*48)
+    return {'status': 'success'}
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

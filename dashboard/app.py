@@ -6,6 +6,11 @@ import requests
 app = Flask(__name__)
 redis_client = redis.Redis(host='redis', port=6379, db=0)
 
+def get_today_date_key(metric):
+    # Get a redis key with today's date embedded
+    today = datetime.now().strftime('%Y-%m-%d')
+    return f'{metric}:{today}'
+
 @app.route('/')
 def index():
     # Get task statistics by communicating with the Task Query Service
@@ -26,7 +31,7 @@ def index():
         update_stats = updates_response.json()
         activity = {
             'updates': int(update_stats.get('updates_today') or 0),
-            'new_tasks': int(redis_client.get('new_tasks_count') or 0)
+            'new_tasks': int(update_stats.get('new_tasks') or 0)
         }
     except requests.exceptions.RequestException as e:
         print(f"Error getting update stats: {e}")
@@ -36,17 +41,30 @@ def index():
 
 @app.route('/notify_new_task', methods=['POST'])
 def notify_new_task():
-    redis_client.incr('new_tasks_count')
+    new_tasks_key = get_today_date_key('new_tasks_count')
+    redis_client.incr(new_tasks_key)
+    # Set expiry for 48 hours (to ensure it's available for the full day)
+    redis_client.expire(new_tasks_key, 60*60*48)
     return {'status': 'success'}
 
 @app.route('/notify_task_delete', methods=['POST'])
 def notify_task_delete():
-    redis_client.decr('new_tasks_count')
+    new_tasks_key = get_today_date_key('new_tasks_count')
+    current_count = int(redis_client.get(new_tasks_key) or 0)
+    updates_key = get_today_date_key('updates_count')
+    # Only decrement if the count is greater than 0
+    if current_count > 0:
+        redis_client.decr(new_tasks_key)
+        redis_client.decr(updates_key)
     return {'status': 'success'}
 
 @app.route('/notify_task_update', methods=['POST'])
 def notify_task_update():
-    redis_client.incr('updates_count')
+    # Use the date-based key
+    updates_key = get_today_date_key('updates_count')
+    redis_client.incr(updates_key)
+    # Set expiry for 48 hours
+    redis_client.expire(updates_key, 60*60*48)
     return {'status': 'success'}
 
 if __name__ == '__main__':
