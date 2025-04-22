@@ -10,7 +10,7 @@ This project is a **Task Management System** built using Flask, Redis, and Docke
 - **Task Querying**: View all tasks, filter tasks by status or priority, and delete all tasks.
 - **Task Updating**: Update task details or delete individual tasks.
 - **Dashboard**: View task statistics, including total tasks, status distribution, and priority distribution.
-- **Microservices Architecture**: Each service (creation, query, update, dashboard) runs independently and communicates via REST APIs.
+- **Microservices Architecture**: Each service (creation, query, update, dashboard) runs independently and communicates via APIs.
 - **Redis Integration**: Tasks are stored in Redis for fast and efficient data access.
 - **Dockerized Deployment**: All services are containerized using Docker for easy deployment and scalability.
 
@@ -47,7 +47,7 @@ The system consists of the following services:
 ## Prerequisites
 
 - Docker and Docker Compose installed on your system.
-- Python 3.8+ (if running services locally without Docker).
+- Python 3.8+
 
 ---
 
@@ -55,8 +55,8 @@ The system consists of the following services:
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
-   cd <repository-folder>
+   git@github.com:<Your-Username>/Task-Managment-Service.git
+   
 2. Build and start the services using Docker Compose:
     ```
     docker-compose up --build
