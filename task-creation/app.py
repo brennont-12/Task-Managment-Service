@@ -39,10 +39,7 @@ def create_task():
         redis_client.sadd('tasks', task_id)
 
         # Notify dashboard
-        try:
-            requests.post('http://dashboard:5000/notify_new_task', data={'task_id': task_id})
-        except Exception as e:
-            print(f"Error notifying dashboard: {e}")
+        requests.post('http://dashboard:5000/notify_new_task', data={'task_id': task_id})
 
         # Redirect to success page
         return redirect('/success')

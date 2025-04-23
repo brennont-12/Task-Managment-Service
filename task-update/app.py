@@ -30,14 +30,11 @@ def index():
         return redirect('/query/')
     
     # Check if the task exists by communicating with the Task Query Service
-    try:
-        response = requests.get(f'http://task-query:5000/api/task/{task_id}')
-        if response.status_code != 200:
-            return f"Task with ID {task_id} not found.", 404
-        task = response.json()
-        return render_template('task-update.html', task=task)
-    except requests.exceptions.RequestException as e:
-        return f"Error communicating with Task Query Service: {e}", 500
+    response = requests.get(f'http://task-query:5000/api/task/{task_id}')
+    if response.status_code != 200:
+        return f"Task with ID {task_id} not found.", 404
+    task = response.json()
+    return render_template('task-update.html', task=task)
 
 @app.route('/save', methods=['POST'])
 def save_task():
@@ -53,12 +50,8 @@ def save_task():
         redis_client.srem('tasks', task_id)
         # Delete the task hash
         redis_client.delete(f'task:{task_id}')
-        
-        try:
-            requests.post('http://dashboard:5000/notify_task_delete',
-                         data={'task_id': task_id})
-        except requests.exceptions.RequestException as e:
-            print(f"Error notifying dashboard: {e}")
+
+        requests.post('http://dashboard:5000/notify_task_delete', data={'task_id': task_id})
         
         return redirect('/delete_success')
     
@@ -81,11 +74,7 @@ def save_task():
     redis_client.hset(f'task:{task_id}', mapping=task_data)
     
     # Notify the dashboard service about the task update
-    try:
-        requests.post('http://dashboard:5000/notify_task_update',
-                     data={'task_id': task_id})
-    except requests.exceptions.RequestException as e:
-        print(f"Error notifying dashboard: {e}")
+    requests.post('http://dashboard:5000/notify_task_update',data={'task_id': task_id})
     
     return redirect('/success')
 

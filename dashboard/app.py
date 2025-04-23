@@ -14,29 +14,17 @@ def get_today_date_key(metric):
 @app.route('/')
 def index():
     # Get task statistics by communicating with the Task Query Service
-    try:
-        stats_response = requests.get('http://task-query:5000/api/tasks/stats')
-        stats = stats_response.json()
-    except requests.exceptions.RequestException as e:
-        print(f"Error getting task stats: {e}")
-        stats = {
-            'total_tasks': 0,
-            'status_counts': {'pending': 0, 'in_progress': 0, 'completed': 0},
-            'priority_counts': {'low': 0, 'medium': 0, 'high': 0}
-        }
+    stats_response = requests.get('http://task-query:5000/api/tasks/stats')
+    stats = stats_response.json()
     
     # Get task update activity by communicating with the Task Update Service
-    try:
-        updates_response = requests.get('http://task-update:5000/api/task_updates')
-        update_stats = updates_response.json()
-        activity = {
-            'updates': int(update_stats.get('updates_today') or 0),
-            'new_tasks': int(update_stats.get('new_tasks') or 0)
-        }
-    except requests.exceptions.RequestException as e:
-        print(f"Error getting update stats: {e}")
-        activity = {'updates': 0, 'new_tasks': 0}
-    
+    updates_response = requests.get('http://task-update:5000/api/task_updates')
+    update_stats = updates_response.json()
+    activity = {
+        'updates': int(update_stats.get('updates_today') or 0),
+        'new_tasks': int(update_stats.get('new_tasks') or 0)
+    }
+
     return render_template('task-dashboard.html', stats=stats, activity=activity)
 
 @app.route('/notify_new_task', methods=['POST'])
