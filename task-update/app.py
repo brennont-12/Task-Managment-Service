@@ -40,7 +40,6 @@ def index():
 def save_task():
     task_id = request.form.get('task_id')
     
-    # Check if task exists
     if not redis_client.exists(f'task:{task_id}'):
         return f"Task with ID {task_id} not found.", 404
     
@@ -55,14 +54,12 @@ def save_task():
         
         return redirect('/delete_success')
     
-    # Handle update (default case)
     title = request.form.get('title')
     description = request.form.get('description', '')
     priority = request.form.get('priority', 'medium')
     due_date = request.form.get('due_date', '')
     status = request.form.get('status', 'pending')
     
-    # Update task in Redis
     task_data = {
         'id': task_id,
         'title': title,
@@ -73,7 +70,6 @@ def save_task():
     }
     redis_client.hset(f'task:{task_id}', mapping=task_data)
     
-    # Notify the dashboard service about the task update
     requests.post('http://dashboard:5000/notify_task_update',data={'task_id': task_id})
     
     return redirect('/success')
@@ -98,7 +94,6 @@ def notify_task_update():
     # Increment the date-based counter
     updates_key = get_today_date_key('updates_count')
     redis_client.incr(updates_key)
-    # Set expiry for 48 hours (to ensure it's available for the full day)
     redis_client.expire(updates_key, 60*60*48)
     return {'status': 'success'}
 

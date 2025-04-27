@@ -13,11 +13,9 @@ def get_today_date_key(metric):
 
 @app.route('/')
 def index():
-    # Get task statistics by communicating with the Task Query Service
     stats_response = requests.get('http://task-query:5000/api/tasks/stats')
     stats = stats_response.json()
     
-    # Get task update activity by communicating with the Task Update Service
     updates_response = requests.get('http://task-update:5000/api/task_updates')
     update_stats = updates_response.json()
     activity = {
@@ -31,7 +29,6 @@ def index():
 def notify_new_task():
     new_tasks_key = get_today_date_key('new_tasks_count')
     redis_client.incr(new_tasks_key)
-    # Set expiry for 48 hours (to ensure it's available for the full day)
     redis_client.expire(new_tasks_key, 60*60*48)
     return {'status': 'success'}
 
@@ -40,7 +37,6 @@ def notify_task_delete():
     new_tasks_key = get_today_date_key('new_tasks_count')
     current_count = int(redis_client.get(new_tasks_key) or 0)
     updates_key = get_today_date_key('updates_count')
-    # Only decrement if the count is greater than 0
     if current_count > 0:
         redis_client.decr(new_tasks_key)
         redis_client.decr(updates_key)
@@ -51,7 +47,6 @@ def notify_task_update():
     # Use the date-based key
     updates_key = get_today_date_key('updates_count')
     redis_client.incr(updates_key)
-    # Set expiry for 48 hours
     redis_client.expire(updates_key, 60*60*48)
     return {'status': 'success'}
 

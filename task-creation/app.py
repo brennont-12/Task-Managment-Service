@@ -18,13 +18,11 @@ def create_task():
         # Generate a unique task ID
         task_id = str(uuid.uuid4())
 
-        # Get task details from form
         title = request.form.get('title')
         description = request.form.get('description', '')
         priority = request.form.get('priority', 'medium')
         due_date = request.form.get('due_date', '')
 
-        # Store task in Redis as a hash
         task_data = {
             'id': task_id,
             'title': title,
@@ -38,12 +36,9 @@ def create_task():
         redis_client.hset(f'task:{task_id}', mapping=task_data)
         redis_client.sadd('tasks', task_id)
 
-        # Notify dashboard
         requests.post('http://dashboard:5000/notify_new_task', data={'task_id': task_id})
 
-        # Redirect to success page
         return redirect('/success')
-    # If GET request, render the form
     return render_template('task_creation.html')
 
 @app.route('/success')

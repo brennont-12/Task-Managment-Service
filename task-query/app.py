@@ -31,7 +31,6 @@ def filter_tasks():
     priority = request.args.get('priority', 'all')
     tasks = get_all_tasks()
     
-    # Apply filters
     if status != 'all':
         tasks = [task for task in tasks if task['status'] == status]
     if priority != 'all':
@@ -41,25 +40,19 @@ def filter_tasks():
 
 @app.route('/delete-all', methods=['POST'])
 def delete_all_tasks():
-    # Get all keys that match task:* pattern
     task_keys = redis_client.keys('task:*')
     
-    # Create a pipeline
     pipeline = redis_client.pipeline()
     
-    # Delete all task:* keys directly
     for task_key in task_keys:
         pipeline.delete(task_key)
     
-    # Delete the 'tasks' key if it exists
     if redis_client.exists('tasks'):
         pipeline.delete('tasks')
     
-    # Reset today's new_tasks_count and updates_count using date-based keys
     new_tasks_key = get_today_date_key('new_tasks_count')
     updates_key = get_today_date_key('updates_count')
     
-    # Set both counters to 0
     pipeline.set(new_tasks_key, 0)
     pipeline.set(updates_key, 0)
     
@@ -90,14 +83,12 @@ def api_tasks_stats():
     # API Endpoint to get task statistics
     tasks = get_all_tasks()
     
-    # Count tasks by status
     status_counts = {
         'pending': 0,
         'in_progress': 0,
         'completed': 0
     }
     
-    # Count tasks by priority
     priority_counts = {
         'low': 0,
         'medium': 0,
