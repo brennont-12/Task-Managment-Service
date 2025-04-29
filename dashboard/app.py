@@ -6,11 +6,13 @@ import requests
 app = Flask(__name__)
 redis_client = redis.Redis(host='redis', port=6379, db=0)
 
+# Function to get a key with today's date embedded
 def get_today_date_key(metric):
     # Get a redis key with today's date embedded
     today = datetime.now().strftime('%Y-%m-%d')
     return f'{metric}:{today}'
 
+# Dashboard route
 @app.route('/')
 def index():
     stats_response = requests.get('http://task-query:5000/api/tasks/stats')
@@ -25,6 +27,7 @@ def index():
 
     return render_template('task-dashboard.html', stats=stats, activity=activity)
 
+# Notify the dashboard that a new task was created
 @app.route('/notify_new_task', methods=['POST'])
 def notify_new_task():
     new_tasks_key = get_today_date_key('new_tasks_count')
@@ -32,6 +35,7 @@ def notify_new_task():
     redis_client.expire(new_tasks_key, 60*60*48)
     return {'status': 'success'}
 
+# Notify the dashboard that a task was deleted
 @app.route('/notify_task_delete', methods=['POST'])
 def notify_task_delete():
     new_tasks_key = get_today_date_key('new_tasks_count')
@@ -42,6 +46,7 @@ def notify_task_delete():
         redis_client.decr(updates_key)
     return {'status': 'success'}
 
+# Notify the dashboard that a task was updated
 @app.route('/notify_task_update', methods=['POST'])
 def notify_task_update():
     # Use the date-based key

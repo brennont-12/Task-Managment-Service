@@ -5,11 +5,13 @@ from datetime import datetime
 app = Flask(__name__)
 redis_client = redis.Redis(host='redis', port=6379, db=0)
 
+# Function to get a redis key with today's date embedded
 def get_today_date_key(metric):
     # Get a redis key with today's date embedded
     today = datetime.now().strftime('%Y-%m-%d')
     return f'{metric}:{today}'
 
+# Function to get all tasks from Redis
 def get_all_tasks():
     tasks = []
     task_ids = redis_client.smembers('tasks')
@@ -20,11 +22,13 @@ def get_all_tasks():
             tasks.append(task)
     return tasks
 
+# Render the main page with all tasks
 @app.route('/')
 def index():
     tasks = get_all_tasks()
     return render_template('task-query.html', tasks=tasks)
 
+# Filter tasks by status and/or priority
 @app.route('/filter')
 def filter_tasks():
     status = request.args.get('status', 'all')
@@ -38,6 +42,7 @@ def filter_tasks():
     
     return render_template('task-query.html', tasks=tasks)
 
+# Option to delete all tasks
 @app.route('/delete-all', methods=['POST'])
 def delete_all_tasks():
     task_keys = redis_client.keys('task:*')
@@ -61,15 +66,18 @@ def delete_all_tasks():
     # Return success
     return redirect('/success')
 
+# Render a simple HTML page to confirm deletion
 @app.route('/success')
 def success():
     return render_template('success-delete-all.html')
+
 
 @app.route('/api/tasks')
 def api_tasks():
     tasks = get_all_tasks()
     return jsonify(tasks)
 
+# Get an individual Task
 @app.route('/api/task/<task_id>')
 def api_task(task_id):
     task_data = redis_client.hgetall(f'task:{task_id}')
@@ -78,9 +86,9 @@ def api_task(task_id):
     task = {key.decode(): value.decode() for key, value in task_data.items()}
     return jsonify(task)
 
+# API Endpoint to get task statistics
 @app.route('/api/tasks/stats')
 def api_tasks_stats():
-    # API Endpoint to get task statistics
     tasks = get_all_tasks()
     
     status_counts = {

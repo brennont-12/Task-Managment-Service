@@ -6,23 +6,27 @@ import requests
 app = Flask(__name__)
 redis_client = redis.Redis(host='redis', port=6379, db=0)
 
+# Get a key with today's date embedded
 def get_today_date_key(metric):
     # Get a redis key with today's date embedded
     today = dt.now().strftime('%Y-%m-%d')
     return f'{metric}:{today}'
 
+# Get the number of recent updates
 def get_updates_today():
     # Get the number of updates for today, using date-based data
     updates_key = get_today_date_key('updates_count')
     count = redis_client.get(updates_key)
     return int(count) if count else 0
 
+# Get the number of new tasks
 def get_new_tasks_today():
     # Get the number of updates for today, using date-based data
     new_tasks_key = get_today_date_key('new_tasks_count')
     count = redis_client.get(new_tasks_key)
     return int(count) if count else 0
 
+# Base route does not exist so we redirect to the query page
 @app.route('/')
 def index():
     task_id = request.args.get('task_id')
@@ -36,6 +40,7 @@ def index():
     task = response.json()
     return render_template('task-update.html', task=task)
 
+# Route to handle task updates
 @app.route('/save', methods=['POST'])
 def save_task():
     task_id = request.form.get('task_id')
@@ -74,21 +79,24 @@ def save_task():
     
     return redirect('/success')
 
+# Route to show a task was successfully updated
 @app.route('/success')
 def success():
     return render_template('success-update.html')
 
+# Render a simple HTML page to confirm deletion
 @app.route('/delete_success')
 def delete_success():
     return render_template('success-delete.html')
 
+# API endpoint to get task updates
 @app.route('/api/task_updates')
 def get_task_updates():
     return {
         'updates_today': get_updates_today(),
         'new_tasks': get_new_tasks_today()
     }
-
+# Notify the dashboard that a new task was created
 @app.route('/notify_task_update', methods=['POST'])
 def notify_task_update():
     # Increment the date-based counter

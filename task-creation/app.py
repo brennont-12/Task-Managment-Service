@@ -7,11 +7,12 @@ import requests
 app = Flask(__name__)
 redis_client = redis.Redis(host='redis', port=6379, db=0)
 
-
+# Simple HTML page to show task creation form
 @app.route('/')
 def index():
     return render_template('task_creation.html')
 
+# Function to create task and add it to Redis
 @app.route('/create', methods=['GET', 'POST'])
 def create_task():
     if request.method == 'POST':
@@ -41,6 +42,7 @@ def create_task():
         return redirect('/success')
     return render_template('task_creation.html')
 
+# Simple HTML page to show success message
 @app.route('/success')
 def success():
     return render_template('success-create.html')
