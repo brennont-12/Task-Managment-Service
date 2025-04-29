@@ -25,7 +25,7 @@ def index():
     tasks = get_all_tasks()
     return render_template('task-query.html', tasks=tasks)
 
-@app.route('/filter')
+@app.route('/filter', methods=['GET'])
 def filter_tasks():
     status = request.args.get('status', 'all')
     priority = request.args.get('priority', 'all')
@@ -38,7 +38,7 @@ def filter_tasks():
     
     return render_template('task-query.html', tasks=tasks)
 
-@app.route('/delete-all', methods=['POST'])
+@app.route('/query/delete-all', methods=['POST'])
 def delete_all_tasks():
     task_keys = redis_client.keys('task:*')
     
@@ -112,4 +112,4 @@ def api_tasks_stats():
     })
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', debug=True)
