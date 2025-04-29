@@ -1,3 +1,7 @@
 #Ignore writeups
 COS442_Project_Writeup.pdf
 COS442_Project_Writeup.docx
+~$COS442_Project_Writeup.docx
+/screenshots
+/BT_CloudComputing_Project_Instance
+.gitignore
