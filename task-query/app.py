@@ -71,20 +71,14 @@ def delete_all_tasks():
 def success():
     return render_template('success-delete-all.html')
 
-
-@app.route('/api/tasks')
-def api_tasks():
-    tasks = get_all_tasks()
-    return jsonify(tasks)
-
 # Get an individual Task
 @app.route('/api/task/<task_id>')
 def api_task(task_id):
     task_data = redis_client.hgetall(f'task:{task_id}')
     if not task_data:
-        return jsonify({"error": "Task not found"}), 404
+        return "404 Not Found", 404
     task = {key.decode(): value.decode() for key, value in task_data.items()}
-    return jsonify(task)
+    return task
 
 # API Endpoint to get task statistics
 @app.route('/api/tasks/stats')
